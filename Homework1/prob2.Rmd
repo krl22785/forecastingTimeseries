@@ -1,3 +1,8 @@
+
+##### Kenneth Luna
+##### Homework1
+
+
 In this problem we will consider the daily U.S. Dollar-Euro exchange rate,
 daily, 4 Jan 1999 to 27 Jan 2015 (*n* = 4115).
 
@@ -20,7 +25,7 @@ ggplot() + geom_line(aes(date, euro)) + xlab(NULL) + ylab("Rate") + labs(title =
 
 
 **Does a straight-line model seem appropriate?**
-A straight-line model does not seem appropriate here because there is too much volatility in the US Dollar-Euro exchange rate.  Furthermore, there isn't a consistent long term trend.  
+A straight-line model does not seem appropriate here because there is too much volatility in the US Dollar-Euro exchange rate.  Furthermore, there isn't a constant long term trend or even a seasonal component.  
 
 
 
@@ -51,6 +56,9 @@ predict(model2, newdata, interval = 'prediction', level = .95)
 for 28 Jan 2015?  If not, then use what you learned in Problem~1 to give a
 statistical explanation of what went wrong.**
 
+The USD/Euro exchange rate on Jan 28 was 1.134 at close of business day.  Neither model succeeded in containing a 95% confidence interval that captured that end of day exchange rate.  Model1 was significantly off the mark; this is likely due to a lack of and less relevant time series data as it mostly pertains to the early 2000s.  Model2 was closer but over-estimated the exchange rate.  
+
+The issue with this model is that it is not linear.  Unlike the first problem where GDP clearly grew over time, the exchange rate of USD to Euros shows different characteristics in terms of its trends.  A linear regression model fails to capture this, and thus fails to accurately predict these exchange rates.  
 
 Part C
 ------

@@ -1,3 +1,8 @@
+
+
+##### Kenneth Luna
+##### Homework1
+
 In this problem we will investigate the United States Gross Domestic Product 
 (GDP).  The data file `gdp.csv` contains the real US GDP, quarterly, from 1946, 
 Q4 to 2014 Q2, seasonally adjusted and inflation adjusted, in billions of 2009 
@@ -26,7 +31,7 @@ ggplot() + geom_line(aes(date, gdp)) + ylab("GDP") + xlab(NULL) + labs(title = "
 
 **Does GDP seem to grow linearly over time?**
 
-The GDP seems to grow (sub)linearly over time as the coefficient value is .5998.  
+Yes, it appears GDP grows linearly over time based on what this graph looks like. 
 
 
 
@@ -44,7 +49,7 @@ ggplot() + geom_line(aes(date, log.gdp)) + ylab("Log(GDP)") + xlab(NULL) + labs(
 **Does log GDP appear to grow linearly over time?  If so, then what does this
 imply about the growth of GDP itself?**
 
-Log GDP grows linearly over time.  This approach mitigates for level-dependent volatility which can be seen in the prior graph.  
+Log GDP grows linearly over time.  What we can infer from this model is that the log straightens out any exponential growth and reduces variance from our prior time series model.  Considering that this model appears significantly more linear compared to GDP itself, we can imply that growth is actually exponential.  
 
 
 Part C
@@ -79,6 +84,7 @@ predict(model, newdata, interval = 'prediction', level = .95)
 **Do you think this interval forecast (prediction interval) is valid?  Does it
 seem too wide, or too precise?  Explain.**
 
+I think this interval forecast is too wide.  If you convert to the real GDP, you get a 95% confidence interval range of 16,809 to 21,262, which is too severe based on historical trends.  For the GDP to drop down to those lower levels, we must assume there is a severe economic shock around the corner.  Although that might be true, what is the likelihood that it is?  The same can be said about the high end of the CI; the US economy has been recovering for the last 8 years, and it would assume that our best year is still to come which is highly doubtful.  I think we could generate a more precise confidence interval.  
 
 Part D
 ------
@@ -91,6 +97,7 @@ ggplot() + geom_line(aes(date, log.gdp)) + geom_abline(intercept = 8.400e+00 , s
 
 **Does the line fit well?**
 
+The line fits well up until the last 6 to 7 years.  The same can be said about the front end of the curve around 1950.  The fitted line seems to over-state GDP relative to actual GDP. 
 
 Part E
 ------
@@ -105,3 +112,16 @@ ggplot() + geom_point(aes(time, res), colour = 'red') + labs(title = "Residuals 
 **What potential problems with the linear model are indicated by this plot?
 Do you think these problems could spoil the validity of the forecast
 interval?**
+
+The problem with this model is that each observation is not entirely indepenent of one another.  Based on the residual plot, there is a very predictable pattern; in years when GDP grew, it is highly probably that the subsequent year will realize an increase as well and vice-versa.  
+
+This observation can spoil the validity of our forecast model as it violates a key assumption of linear regression that each observation is independent.  
+
+
+
+
+
+
+
+
+
