@@ -65,7 +65,7 @@ Part B
 **Based on these two plots, which seems to be a better forecast of Today's
 Russell: Yesterday's Russell, or 0.5 (Yesterday's Russell)?**
 
-Yesterday's Russell is a better forecast of Today's Russell. Where the Russell Index was yesterday is a strong indicator of where it will likely be today.  Therefore, we observe Yesterday's Russell as highly correlated to Today's Russell.  0.5 (Yesterday's Russell) under-estimates both the decreases and increases in the actual RI.  
+Yesterday's Russell is a better forecast of Today's Russell. Where the Russell Index was yesterday is a strong indicator of where it will likely be today.  Therefore, we observe Yesterday's Russell as highly correlated to Today's Russell.  0.5 (Yesterday's Russell) under-estimates both the decreases and increases in Today's Russell.  
 
 Part C
 ------
@@ -126,7 +126,7 @@ $$today = .9999972 * yesterday + .1493892$$
 
 **Is this consistent with your answers to Problem 1, parts B and C?**
 
-Yes this results holds consistent with my findings in Problem 1.  Yesterday's Russell Index is highly correlated with Today's Russell Index as the coefficient value has an absolute value of 1.  
+Yes this results holds consistent with my findings in Problem 1.  Yesterday's Russell Index is highly correlated with Today's Russell Index as the coefficient value has an absolute value of 1.  I do think there is an issue with this model because the p-value is essentially 0.  This might question the validity of this model.  
 
 
 
@@ -155,7 +155,7 @@ confint(model, "(Intercept)")
 
 **Briefly comment on the intercept as well.**
 
-This intercept value has limited reliability based on high p-value.  Based on its 95% confidence interval, it appears that the intercept is attempting to account for any noise between yesterday's RI versus today's RI.  
+This intercept value has limited reliability based on its high p-value.  
 
 
 Part D
@@ -215,7 +215,8 @@ t.test(ret.today)
 **Are the mean returns significantly different from zero?  Interpret your
 findings.**
 
-Both mean results are significantly close to 0.  Based on these results, we can be 95% percent confident that the mean return on the RI is 0 in our  dataset.  
+The mean returns are different from zero.  At a .000195 compounded daily for several years, one can infer that this not a zero return over time.
+
 
 Part B
 ------
