@@ -1,0 +1,228 @@
+Homework 4: Data Analysis for Problems 2--5
+===========================================
+*Kenneth Luna*
+*work in progress* 
+
+---
+
+**NOTE:** In this assignment, we will use the "forecast" package for R, which adds
+capabilities for identifying and fitting ARIMA models.  You need to install
+this package before you can complete the assignment.
+
+To install the package choose "Install Packages..." from the "Tools" menu in
+RStudio.  Type `forecast` into the packages field, and make
+sure the "Install dependencies" box is checked.  This will download and
+install the package.
+
+After you have installed the package, use the following line to load it into
+R:
+
+```{r}
+library("forecast")
+```
+
+If you get an error about a missing library (possibly `quadprog`), then you will
+need to install the missing library using "Tools > Install Packages..."
+
+
+Problem 2
+=========
+
+
+Housing Starts
+--------------
+
+```{r}
+# Read in data:
+#   New Privately Owned Housing Units Started (in thousands, for U.S.), Yearly,
+#   1959 - Present.
+#   Seasonally adjusted annual rate.
+#
+#   Source: https://research.stlouisfed.org/fred2/series/HOUST/downloaddata
+#
+hs.data <- read.csv("http://ptrckprry.com/course/forecasting/data/housingstarts.csv")
+housing.starts <- hs.data$housing.starts
+
+# Time series plot
+par(mfrow=c(1,1))
+plot(as.Date(hs.data$date), housing.starts, type="l",
+     xlab="Date", ylab="Housing Starts")
+
+# ACF and PACF
+par(mfrow=c(1,2))
+Acf(housing.starts)
+Pacf(housing.starts)
+```
+
+**Identify an ARIMA(p, d, q) model.  Give reasons for your choices of p, d, q.**
+
+I would identify this model as ARIMA(0, 0, 2).  
+
+(p) is zero because the correlagram for an AR(P) would expect a steady decline in the correlogram and that is not the case in this example.  
+
+(d) is zero because we did not implement any differencing.  
+
+(q) is 2 as the correlogram cuts off immediately at q = 2.  For all k > q, values are close to 0. 
+
+
+Log GDP
+-------
+
+```{r}
+# Read in data:
+#   Real United States Gross Domestic Product,
+#   1947 (Q1) - Present.
+#   Seasonally adjusted and inflation adjusted, in billions of 2009 dollars.
+#
+#   Source: http://bea.gov/national/
+#
+gdp.data <- read.csv("http://ptrckprry.com/course/forecasting/data/gdp.csv")
+gdp <- gdp.data$gdp
+
+log.gdp <- log(gdp)
+
+# Time series plot
+par(mfrow=c(1,1))
+plot(as.Date(gdp.data$date), log.gdp, type="l",
+     xlab="Date", ylab="Log(GDP)")
+
+# ACF and PACF
+par(mfrow=c(1,2))
+Acf(log.gdp)
+Pacf(log.gdp)
+```
+
+**Identify p, d, q.  Give reasons for your choices.**
+
+I would identify this model as ARIMA(1, 0, 0).  
+
+(p) is 1 because the partial correlogram immediately cuts off at p > 1, there indicating that this has characters of an AR(1) model.   
+
+(d) is zero because we did not implement any differencing.  
+
+(q) is 0 as the autocorrelation correlogram gradual decreases over time.  
+
+
+Diff Log GDP
+------------
+
+```{r}
+# Take first differences
+diff.log.gdp <- c(NA, diff(log.gdp))
+
+# Time series plot
+par(mfrow=c(1,1))
+plot(as.Date(gdp.data$date), diff.log.gdp, type="l",
+     xlab="Date", ylab="Log(GDP)")
+
+
+# ACF and PACF
+par(mfrow=c(1,2))
+Acf(diff.log.gdp)
+Pacf(diff.log.gdp)
+```
+
+**Identify p, d, q.  Give reasons for your choices.**
+
+I would identify this model as ARIMA(1, 1, 0).  
+
+(p) is 1 as the partial correlogram cuts off after p > 1.  
+
+(d) is 1 as we took the different from time t and time t-1 
+
+(q) is 0.  The PCF model does not die down as an MA(Q) should, therefore we conclude that the value of q is 0.  
+
+
+Diff Log CPI (Inflation)
+------------------------
+
+```{r}
+# Read in data:
+#  U.S. Consumer Price Index, Monthly,
+#  December, 1946 - Present.
+#  Seasonally Adjusted. All Urban Consumers (1982 to 1984 as 100).
+#
+#  Source: https://research.stlouisfed.org/fred2/series/CPIAUCSL/downloaddata
+#
+cpi.data <- read.csv("http://ptrckprry.com/course/forecasting/data/cpi.csv")
+cpi <- cpi.data$cpi
+
+# Take logs
+log.cpi = log(cpi)
+
+# Take first differences
+diff.log.cpi <- c(NA, diff(log.cpi))
+
+# Time series plot
+par(mfrow=c(1,1))
+plot(as.Date(cpi.data$date), diff.log.cpi, type="l",
+     xlab="Date", ylab="Log(CPI)")
+
+# ACF and PACF
+par(mfrow=c(1,2))
+Acf(diff.log.cpi)
+Pacf(diff.log.cpi)
+```
+
+**Identify p, d, q.  Give reasons for your choices.**
+
+I would identify this model as ARIMA(1,1,1).
+
+(p) is 1 as the diff.log.cpi gradually dies down. 
+
+(d) is 1 as the difference was taken once.  
+
+(q) is 1 as the diff.log.cpi gradually dies down as well.  
+
+
+**For the inflation series (first log of the CPI) determine if additional
+differencing results in over-differencing.**
+
+```{r}
+# Take differences of inflation (second differences of log CPI)
+diff2.log.cpi <- c(NA, diff(diff.log.cpi))
+
+# Compute ACF
+par(mfrow=c(1,1))
+Acf(diff2.log.cpi)
+
+# Use this plot to determine if additional differencing results in over-differencing.
+```
+
+The fact that lag-1 autocorrelation is less than 0 indicates that we might have over-differenced in this case.  If the lag-1 is more negative than -.5, then we definitely over-differenced already, but in this case it is around -.4.  Lag-1 should never be negative.  
+
+
+Problems 3--5
+=============
+
+To complete Problems 3--5, we need to compute the sample autocorrelations for
+the first difference of the log GDP series.
+
+```{r}
+# Hint: use the Acf funciton with plot=FALSE to get the estimated autocorrelations
+Acf(diff.log.gdp, plot = FALSE)
+```
+
+**Use the estimated autocorrelations to complete Problems 3--5.  Show your
+work on a separate page.**
+
+
+
+For Problem 5(c), we need the last few values of `diff.log.gdp` and `log.gdp`.
+We can get these with the `tail` command:
+
+```{r}
+# Uncomment the following lines to get the last 5 values of log.gdp and diff.log.gdp:
+tail(log.gdp)
+tail(diff.log.gdp)
+```
+
+Notes for 5(c)
+
+```{r}
+
+tail(diff.log.gdp)[6] # t -1
+tail(diff.log.gdp)[5] # t -2 
+ 
+xt <- -.254 * tail(diff.log.gdp)[6] + .307 * tail(diff.log.gdp)[5]
+```
