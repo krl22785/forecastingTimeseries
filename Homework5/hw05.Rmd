@@ -24,10 +24,11 @@ Part A
 
 We first construct the log unemployment series, and its first two differences:
 ```{r}
-# edit and uncomment the following lines
-# log.unemp <- ??
-# diff.log.unemp <- ??
-# diff2.log.unemp <- ??
+
+log.unemp <- log(unemp)
+diff.log.unemp <- c(NA, diff(log.unemp))
+diff2.log.unemp <- c(NA, diff(diff.log.unemp))
+
 ```
 
 Now, we use time series plots, ACFs and PACFs to determine the appropriate
@@ -36,23 +37,49 @@ level of differencing.
 Here are the plots for the original series:
 
 ```{r}
-# add TS plot, ACF, and Pacf for log.unemp
+
+par(mfrow=c(1,1))
+plot(as.Date(date), log.unemp, type="l",
+     xlab="Date", ylab="Log(Unemployment)")
+
+par(mfrow=c(1,2))
+Acf(log.unemp)
+Pacf(log.unemp)
+
 ```
 
 Here are the plots for the first difference:
 
 ```{r}
-# add TS plot, ACF, and Pacf for diff.log.unemp
+par(mfrow=c(1,1))
+plot(as.Date(date), diff.log.unemp, type="l",
+     xlab="Date", ylab="Diff. Log(Unemployment)")
+
+par(mfrow=c(1,2))
+Acf(diff.log.unemp)
+Pacf(diff.log.unemp)
+
 ```
 
 Here are the plots for the second difference:
 
 ```{r}
-# add TS plot, ACF, and Pacf for diff2.log.unemp
+
+par(mfrow=c(1,1))
+plot(as.Date(date), diff2.log.unemp, type="l",
+     xlab="Date", ylab="Diff2. Log(Unemployment)")
+
+par(mfrow=c(1,2))
+Acf(diff2.log.unemp)
+Pacf(diff2.log.unemp)
+
 ```
 
 
 **Choose d for an ARIMA model.  Explain your reasoning.**
+
+For this ARIMA model, (d) should be 1.  The reason (d) should be 1 is because when we observe
+(d) = 2, lag-1 is extremely negative, indicatin that we potentially over-differenced.  Hence, why (d) for this exercise should be 1.  
 
 
 
