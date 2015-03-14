@@ -217,6 +217,8 @@ plot(forecast(fit, h=30, level = 95))
 
 **Do the forecasts seem reasonable?**
 
+The forecasts seems reasonable.  It shows a continuation of the trend for the last obserations with a drop in unemployment. 
 
 **Do the forecast intervals seem excessively wide?**
 
+I do believe the forecast seems a bit too wide.  The bottom end of the 95% CI goes as low as the lowest record unemployment recording in this data and as high as the highest.  
