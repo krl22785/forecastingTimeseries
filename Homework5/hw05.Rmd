@@ -1,7 +1,6 @@
 Homework 5
 ==========
-*Firstname Lastname (Replace this part with your name)*
-
+*Kenneth Luna*
 
 For this assignment, we will again be using the `forecast` library.
 
@@ -79,8 +78,7 @@ Pacf(diff2.log.unemp)
 **Choose d for an ARIMA model.  Explain your reasoning.**
 
 For this ARIMA model, (d) should be 1.  The reason (d) should be 1 is because when we observe
-(d) = 2, lag-1 is extremely negative, indicatin that we potentially over-differenced.  Hence, why (d) for this exercise should be 1.  
-
+(d) = 2, lag-1 is extremely negative, indicating that we potentially over-differenced. 
 
 
 Part B
@@ -141,22 +139,23 @@ Part C
 Here is the estimated model:
 ```{r}
 # edit and uncomment the following two lines
+
 fit <- Arima(log.unemp, c(2,0,2), include.constant = FALSE)
 print(fit)
+
 ```
 
 
 **Are all of the parameters statistically significant?**
 
-All the parameters are statistically significant as the z-score excited 1.96 in absolute value.  
-
-
+All the parameters are statistically significant based on their relatively high z-statistic values.  
 
 
 Part D
 ------
 
 **Write the complete form of the fitted model. (No code required.)**
+
 
 x(t) = 1.815 * x(t-1) + -.8152 * x(t-2) + eps(t) + -.7739 * eps(t-1) + .1662 * eps(t-2)
 
@@ -182,7 +181,7 @@ Box.test(resid, lag=48, type = "Ljung-Box", fitdf=4)
 
 **Does the model seem to be adequate?**
 
-Yes the model is adequate.  The p-value for all different Ljung-Box tests are less than .05.  
+The small p-values indicate dependence, therefore I would conclude that this model is inadequate for this analysis.  
 
 Part F
 ------
@@ -201,8 +200,7 @@ Pacf(resid)
 
 **Do these plots indicate any inadequacies in the model?**
 
-Based on this ACF and PACF plots, there does not seem to be any inadequecies.  
-
+The plot for residuals on the fitted model seems to have a zero mean from just looking at it.  Based on these ACF and PACF plots, there does seem to be some inadequecies as some spikes extend outside of the significance limits, indicating they are more than just white noise.  
 
 
 Part G
@@ -212,6 +210,7 @@ Here is the original data, along with the forecasts and 95% forecast intervals
 for lead times 1 to 30:
 
 ```{r}
+par(mfrow=c(1,1))
 plot(forecast(fit, h=30, level = 95))
 ```
 
@@ -221,4 +220,6 @@ The forecasts seems reasonable.  It shows a continuation of the trend for the la
 
 **Do the forecast intervals seem excessively wide?**
 
-I do believe the forecast seems a bit too wide.  The bottom end of the 95% CI goes as low as the lowest record unemployment recording in this data and as high as the highest.  
+I do believe the forecast seems a bit wide.  The bottom end of the 95% CI goes as low as the lowest record unemployment recording in this data and as high as the highest.  
+
+
