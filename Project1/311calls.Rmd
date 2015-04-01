@@ -7,19 +7,21 @@ Going to use several packages for this project.  "plyr" allows for data summariz
 ```{r}
 library("forecast")
 library("plyr") ## for data wrangling 
-library("ggplot") ## for data visualizations 
+library("ggplot2") ## for data visualizations 
 ```
 
 The dataset is the number of calls to 311 services in NYC pertaining to housing complaints.  
 
 ```{r}
 data <- read.csv("/Users/krluna/forecastingTimeseries/Project1/311_data.csv")
+
 data$count <- 1
 data$Created.Date <- as.Date(data$Created.Date, "%m/%d/%Y")
 tempdata <- ddply(data, c("Created.Date"), summarise, 
                  calls = length(count)
                  )
-newdata <- tempdata[-c(89),]
+
+newdata <- tempdata[-c(211),]
 
 date <- newdata$Created.Date
 time <- 1:length(date)
@@ -30,24 +32,97 @@ We now plot our initial data for exploration.
 
 ```{r}
 
-ggplot() + geom_line(aes(date, calls)) + xlab("2015") + ylab("Calls") + 
-   labs(title = 'Housing Complaints to 311 in 2015') 
+par(mfrow=c(1,1))
+plot(date, calls, type="l",
+     xlab="Date", ylab="311 Calls")
+
+par(mfrow=c(1,2))
+Acf(calls)
+Pacf(calls)
 
 ```
 
-### The dataset is the unemployment rate, monthly, seasonally adjusted.
-#date <- as.Date(data$date)
-#time <- 1:length(date)
-#unemp <- data$unemployment
+Preliminary Observations
 
-We first construct the log unemployment series, and its first two differences:
+311 Calls does not seem to have any seasonality from January 1st 2015 until today.  The initial patterns that stand out of this preliminary plot are the spikes in early January and mid February.  Anecdotally, one might infer that this increase in calls to 311 is a function of adverse weather the in NYC Metropolitan Area, leading tenants to call and/or complain about lack of heating.  
+
+There does appear to be some fluctation in call volume based on the day of the week.  The plot shows bumps with the occasional drop off each 6 or 7 days.  This trend holds true across the entire, minus the 3 or 4 observations that appear to be days that realized high call volumes. 
+
+Based on this data set, we see that summer months do seem to be a bit quieter in terms of call volume.  September through October of 2014 appear to have lower call volumes but picks up come November.  
+
+Based on the Auto-Correlation Function and Partial Auto-Correlation Function, we might suspect this plot to be an Auto-Regressive modeel.  The correlogram dies down while the parti correlogram cuts off after lag-1.  
+
+
 ```{r}
 
-log.unemp <- log(unemp)
-diff.log.unemp <- c(NA, diff(log.unemp))
-diff2.log.unemp <- c(NA, diff(diff.log.unemp))
+log.calls <- log(calls)
+diff.log.calls <- c(NA, diff(log.calls))
+diff2.log.calls <- c(NA, diff(diff.log.calls))
 
 ```
+
+We decided to take logs instead of using absolute values in order to scale down some of the spikes in call volumes occurring in January and Febuary.  The two highest days in 311 calls were more than 3x larger than the average call volumne per day for this specific time period.  
+
+```{r}
+
+par(mfrow=c(1,1))
+plot(date, log.calls, type="l",
+     xlab="Date", ylab="Log(Calls)")
+
+par(mfrow=c(1,2))
+Acf(log.calls)
+Pacf(log.calls)
+
+```
+
+
+Take the first difference:
+
+```{r}
+
+par(mfrow=c(1,1))
+plot(date, diff.log.calls, type="l",
+     xlab="Date", ylab="Diff. Log(Calls)")
+
+par(mfrow=c(1,2))
+Acf(diff.log.calls)
+Pacf(diff.log.calls)
+
+```
+
+Take teh second difference: 
+
+```{r}
+
+par(mfrow=c(1,1))
+plot(date, diff2.log.calls, type="l",
+     xlab="Date", ylab="Diff2. Log(Calls)")
+
+par(mfrow=c(1,2))
+Acf(diff2.log.calls)
+Pacf(diff2.log.calls)
+
+```
+
+Based on the ACF and PACF models for the first difference of log 311 calls, it appears we might have over-differenced as the first lag auto-correlation has a negative value.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Now, we use time series plots, ACFs and PACFs to determine the appropriate
 level of differencing.
@@ -57,7 +132,7 @@ Here are the plots for the original series:
 ```{r}
 
 par(mfrow=c(1,1))
-plot(as.Date(date), log.unemp, type="l",
+plot(as.Date(date), difflog.unemp, type="l",
      xlab="Date", ylab="Log(Unemployment)")
 
 par(mfrow=c(1,2))
