@@ -104,14 +104,55 @@ Pacf(diff2.log.calls)
 
 ```
 
-Based on the ACF and PACF models for the first difference of log 311 calls, it appears we might have over-differenced as the first lag auto-correlation has a negative value.  
+Based on the ACF and PACF models for the first difference of log 311 calls, it appears we might have over-differenced as the first lag auto-correlation has a negative value.  The same holds true for the second difference.  
+
+Based on this preliminary analysis, here are the AICC values for the models under consideration:
 
 
+```{r}
+
+fit.00 <- Arima(calls, c(0, 0, 0), include.constant=FALSE)
+fit.01 <- Arima(calls, c(0, 0, 1), include.constant=FALSE)
+fit.02 <- Arima(calls, c(0, 0, 2), include.constant=FALSE)
+fit.10 <- Arima(calls, c(1, 0, 0), include.constant=FALSE)
+fit.11 <- Arima(calls, c(1, 0, 1), include.constant=FALSE)
+fit.12 <- Arima(calls, c(1, 0, 2), include.constant=FALSE)
+fit.20 <- Arima(calls, c(2, 0, 0), include.constant=FALSE)
+fit.21 <- Arima(calls, c(2, 0, 1), include.constant=FALSE)
+fit.22 <- Arima(calls, c(2, 0, 2), include.constant=FALSE)
+
+# With constant:
+fit.00c <- Arima(calls, c(0, 0, 0), include.constant=TRUE)
+fit.01c <- Arima(calls, c(0, 0, 1), include.constant=TRUE)
+fit.02c <- Arima(calls, c(0, 0, 2), include.constant=TRUE)
+fit.10c <- Arima(calls, c(1, 0, 0), include.constant=TRUE)
+fit.11c <- Arima(calls, c(1, 0, 1), include.constant=TRUE)
+fit.12c <- Arima(calls, c(1, 0, 2), include.constant=TRUE)
+fit.20c <- Arima(calls, c(2, 0, 0), include.constant=TRUE)
+fit.21c <- Arima(calls, c(2, 0, 1), include.constant=TRUE)
+fit.22c <- Arima(calls, c(2, 0, 2), include.constant=TRUE)
+
+models <- data.frame(p = rep(c(0, 0, 0, 1, 1, 1, 2, 2, 2), 2),
+                     d = rep(0, 18),
+                     q = rep(c(0, 1, 2), 6),
+                     include.constant = c(rep(FALSE, 9), rep(TRUE, 9)),
+                     loglik = c(fit.00$loglik, fit.01$loglik, fit.02$loglik,
+                                fit.10$loglik, fit.11$loglik, fit.12$loglik,
+                                fit.20$loglik, fit.21$loglik, fit.22$loglik,
+                                fit.00c$loglik, fit.01c$loglik, fit.02c$loglik,
+                                fit.10c$loglik, fit.11c$loglik, fit.12c$loglik,
+                                fit.20c$loglik, fit.21c$loglik, fit.22c$loglik),
+                     aicc = c(fit.00$aicc, fit.01$aicc, fit.02$aicc,
+                                fit.10$aicc, fit.11$aicc, fit.12$aicc,
+                                fit.20$aicc, fit.21$aicc, fit.22$aicc,
+                                fit.00c$aicc, fit.01c$aicc, fit.02c$aicc,
+                                fit.10c$aicc, fit.11c$aicc, fit.12c$aicc,
+                                fit.20c$aicc, fit.21c$aicc, fit.22c$aicc)
+                     )
+```
 
 
-
-
-
+The p, d, q selected based on AICC is the ARIMA(1,0,2) with an AICC value of 3361.741.  
 
 
 
