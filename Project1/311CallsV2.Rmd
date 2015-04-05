@@ -187,10 +187,10 @@ x(t) = .4622 * x(t-1) + .3911 * x(t-2) + eps(t) + .2932 * eps(t-1) + -.5413 * ep
 
 resid <- residuals(fit)
 
-Box.test(resid, lag=12, type = "Ljung-Box", fitdf=4)
-Box.test(resid, lag=24, type = "Ljung-Box", fitdf=4)
-Box.test(resid, lag=36, type = "Ljung-Box", fitdf=4)
-Box.test(resid, lag=48, type = "Ljung-Box", fitdf=4)
+lb12 <- Box.test(resid, lag=12, type = "Ljung-Box", fitdf=4)
+lb24 <- Box.test(resid, lag=24, type = "Ljung-Box", fitdf=4)
+lb36 <- Box.test(resid, lag=36, type = "Ljung-Box", fitdf=4)
+lb48 <- Box.test(resid, lag=48, type = "Ljung-Box", fitdf=4)
 
 ```
 
@@ -199,24 +199,28 @@ P-Values are not statistically significant, therefore indicating that we have re
 
 ```{r}
 par(mfrow=c(1,1))
-plot(date, resid, type="l")
+plot(date, resid, type="l",
+     main = "Figure 13")
+
+abline(h=0.003537943, col = 'red', lty=2)
 
 par(mfrow=c(1,2))
-Acf(resid)
-Pacf(resid)
+Acf(resid, main = "Figure 14\nResiduals")
+Pacf(resid, main = "Figure 15\nResiduals")
 ```
 
 
 ```{r}
 
-forecast(fit, h = 10, level = 95)
+forecast(fit, h = 50, level = 95)
 
 ```
 
 
 ```{r}
 par(mfrow=c(1,1))
-plot(forecast(fit, h=30, level = 95))
+plot(forecast(fit, h=50, level = 95),
+     main = "Figure 16\nForecasts from Arima(2,0,2) with zero mean")
 ```
 
 
