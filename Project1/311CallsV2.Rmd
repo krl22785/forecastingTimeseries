@@ -10,9 +10,7 @@ library("plyr") ## for data wrangling
 library("ggplot2") ## for data visualizations 
 ```
 
-The dataset is the number of calls to 311 services in NYC pertaining to housing complaints.  The dataset is from Jan 1 '13 until today.  In aggregate, the dataset has approximately 1.4M records.  
-dat
-The initial dataset is a record of each call with a date and timestamp.  Preprocessing required grouping this dataset by day, resulting in about 820 records.  
+The dataset is the number of calls to 311 services in NYC.  
 
 ```{r}
 data <- read.csv("/Users/krluna/forecastingTimeseries/Project1/new_311.csv")
@@ -61,7 +59,6 @@ par(mfrow=c(1,2))
 Acf(log.calls,  main = "Figure 3")
 Pacf(log.calls,  main = "Figure 4")
 ```
-
 
 Here we get monthly averages so we can seasonally adjust: 
 
@@ -193,7 +190,7 @@ lb36 <- Box.test(resid, lag=36, type = "Ljung-Box", fitdf=4)
 lb48 <- Box.test(resid, lag=48, type = "Ljung-Box", fitdf=4)
 
 ```
-
+#donna gallesky - models health care data
 
 P-Values are not statistically significant, therefore indicating that we have removed any structure in the data and that it is close to white noise.  
 
