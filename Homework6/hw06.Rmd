@@ -52,37 +52,70 @@ Problem 2
 
 ```{r}
 # Plot chaos1 and chaos2 in separate plots.
+par(mfrow=c(1,1))
+plot(time, chaos1, type = 'b', col = 4)
+
+par(mfrow=c(1,1))
+plot(time, chaos2, type = 'b', col = 4)
 ```
 
 **Do the series look random?**
 
+Chaos1 does not appear to be entirely random.  There seems to be some structure in the plot where the observation f1(x) drops close to zero and gradually works it way up to 1 before it drops again.  These drops in f1(x) occur at a constant cadence as well. 
+
+Chaos2 appears to be more random versus Chaos1. The f2(x) output does not drop close zero at a consistant cadence like f1(x).
+
 **Are they in fact random?**
+
+No they are not random.  Both plots have time series patterns.  In both plots, there are tendencies for both plots to trend upward overtime, until it reaches a shock and drops drastically. Because of this pattern and structure, I conclude that these models are not random.  
+
+http://web.ipac.caltech.edu/staff/fmasci/home/statistics_refs/TestForRandomness_RunsTest.pdf
 
 **Do the series look stationary?**
 
+The models do look stationary overtime.  
 
 Problem 3
 ---------
 
 ```{r}
-# Plot the ACF and PACF for chaos1
+library("forecast")
+
+par(mfrow=c(1,2))
+Acf(chaos1)
+Pacf(chaos1)
+
 ```
 
 **Based on these, suggest an ARMA model.**
 
+Based on this observation, I would suggest an ARIMA(2,0,0).  The ACF gradually dies down until (somewhat) but clearly cuts off in the PACF.  
+
 **Would this model provide the best possible forecasts?**
 
+??? 
 
 Problem 4
 ---------
 
 ```{r}
-# Plot both chaos1 and chaos2 on the same plot
+par(mfrow=c(1,1))
+plot(time, chaos1, 
+     type = 'b', col = 2)
+lines(time, chaos2, 
+      type = 'b', col = 4)
+
+legend("topleft", inset=0.05,
+       legend=c("chaos1", "chaos2"), lty = c(1,1), col=c("red","blue"))
 ```
 
 **Do the paths look similar?**
 
+The plots look similar in terms of structure over time.  The difference is the lag in between shocks between both plots.  
+
 **Should they look similar when t is close to 1?**
+
+There should be a shock and they both f(x) values drop close to zero.  That should happen to both plots considering the parameters of f(x).  
 
 **What should happen if `chaos1` and `chaos2` happen to get very close
 together at some later time?**
@@ -92,19 +125,19 @@ Problem 5
 ---------
 
 ```{r}
-# Plot x2, ..., x50 versus x1, ..., x49 for chaos1
-# (Replace ???? and uncomment the following line)
-# plot(????, ????, type="p")
 
-# Hint:
-# If x is a vector of length 50, then
-#   x[-1]  is equal to c(x[2], x[3], ..., x[50])
-#   x[-50] is equal to c(x[1], x[2], ..., x[49])
+xt1 <- chaos1[-50]
+xt2 <- chaos1[-1]
+
+plot(xt1, xt2, type = "p")
+
 ```
 
 
 **Does this plot reveal the map (in other words, the function *f*) which
 generated the data?**  
+
+Yes this plot reveals the function.  
 
 
 **Do you see why this *f* is called the tent map?**
