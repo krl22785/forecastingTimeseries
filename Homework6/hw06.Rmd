@@ -44,7 +44,7 @@ for (i in 1:50) {
 
 **Check that `x1 = f(x0)`, for `chaos1`.**
 
-x1 matches f(x0).  The results are off by a small margin of error.  The last observation in chaos1 is 0.99152051 while my check has a final value of 0.98681.  The values digress later in the dataset.  
+x1 matches f(x0).  The results are off by a small margin of error.  The last observation in chaos1 is 0.99152051 while my check has a final value of 0.98681.  The values digress later in the dataset but we can infer that x1 = f(x0).  
 
 
 Problem 2
@@ -56,20 +56,18 @@ par(mfrow=c(1,1))
 plot(time, chaos1, type = 'b', col = 4)
 
 par(mfrow=c(1,1))
-plot(time, chaos2, type = 'b', col = 4)
+plot(time, chaos2, type = 'b', col = 2)
 ```
 
 **Do the series look random?**
 
-Chaos1 does not appear to be entirely random.  There seems to be some structure in the plot where the observation f1(x) drops close to zero and gradually works it way up to 1 before it drops again.  These drops in f1(x) occur at a constant cadence as well. 
+Chaos1 does not appear to be entirely random.  There seems to be some structure in the plot where the observation f1(x) drops close to zero when it nears 1 and gradually works it way back up to 1 before it drops again.  These drops in f1(x) occur at a constant cadence as well. 
 
 Chaos2 appears to be more random versus Chaos1. The f2(x) output does not drop close zero at a consistant cadence like f1(x).
 
 **Are they in fact random?**
 
-No they are not random.  Both plots have time series patterns.  In both plots, there are tendencies for both plots to trend upward overtime, until it reaches a shock and drops drastically. Because of this pattern and structure, I conclude that these models are not random.  
-
-http://web.ipac.caltech.edu/staff/fmasci/home/statistics_refs/TestForRandomness_RunsTest.pdf
+No they are not random.  Both plots have structure in them.  In both plots, there are tendencies for both plots to trend upward overtime, until it reaches a shock and drops drastically. Because of this pattern and structure, I conclude that these models are not random.  
 
 **Do the series look stationary?**
 
@@ -79,7 +77,6 @@ Problem 3
 ---------
 
 ```{r}
-library("forecast")
 
 par(mfrow=c(1,2))
 Acf(chaos1)
@@ -89,11 +86,12 @@ Pacf(chaos1)
 
 **Based on these, suggest an ARMA model.**
 
-Based on this observation, I would suggest an ARIMA(2,0,0).  The ACF gradually dies down until (somewhat) but clearly cuts off in the PACF.  
+Based on this observation, I would suggest an ARIMA(2,0,0).  The ACF gradually dies down until (somewhat) lag-2 but clearly cuts off at lag-1 in the PACF.  
 
 **Would this model provide the best possible forecasts?**
 
-??? 
+It is hard to tell based on only observing the ACF and PACF.  We would have to get the AICC for the different ARMA models plus constant or no constant.  The ACF and PACF do look convincingly like an ARMA(2,0,2) model so I will say yes, its the best possible forecast.    
+
 
 Problem 4
 ---------
@@ -111,14 +109,16 @@ legend("topleft", inset=0.05,
 
 **Do the paths look similar?**
 
-The plots look similar in terms of structure over time.  The difference is the lag in between shocks between both plots.  
+The plots look similar in terms of structure over time.  The difference is the lag between shocks in both plots.  
 
 **Should they look similar when t is close to 1?**
 
-There should be a shock and they both f(x) values drop close to zero.  That should happen to both plots considering the parameters of f(x).  
+Yes, they should look similar when t is close to 1 because they have very similar starting points in x{t} = .500 and x{t} = .501.  The divergence begins after either function experiences its first shock and from there they become less similar.  
 
 **What should happen if `chaos1` and `chaos2` happen to get very close
 together at some later time?**
+
+They follow the same patterns.  They esentially look identificaly.  Again, both functions are the same minus the starting point so when they meet, they follow the same y values until the next shock.  
 
 
 Problem 5
@@ -142,6 +142,9 @@ Yes this plot reveals the function.
 
 **Do you see why this *f* is called the tent map?**
 
+This is called the tent map because the shape of the plot is that of a tent.  
 
 **Does this plot help us to see that `{ x_t }` is not an AR(1) series?  How?**
+
+Yes because it shows that the series is not completely random.  There is clear structure in how data is generated.  
 
