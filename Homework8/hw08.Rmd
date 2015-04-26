@@ -36,27 +36,53 @@ Problem 1
 Here is a time series plot of log.rupee, along with the ACF and PACF:
 
 ```{r}
-## Add plots.
+par(mfrow=c(1,1))
+plot(time, log.rupee, type="l",
+     xlab="Date", ylab="Rupee")
+
+par(mfrow=c(1,2))
+Acf(log.rupee)
+Pacf(log.rupee)
 ```
 
 Here is the first difference, along with the ACF and PACF:
 
 ```{r}
 ## Add code to compute the first difference and make the plots.
+diff.log.rupee <- c(NA, diff(log.rupee))
+
+par(mfrow=c(1,1))
+plot(time, diff.log.rupee, type="l",
+     xlab="Date", ylab="1st-Difference Rupee")
+
+par(mfrow=c(1,2))
+Acf(diff.log.rupee)
+Pacf(diff.log.rupee)
+
 ```
 
 Here is the second difference, along with the ACF and PACF:
 
 ```{r}
 ## Add code to compute the second difference and make the plots.
+diff2.log.rupee <- c(NA, diff(diff.log.rupee))
+
+par(mfrow=c(1,1))
+plot(time, diff2.log.rupee, type="l",
+     xlab="Date", ylab="1st-Difference Rupee")
+
+par(mfrow=c(1,2))
+Acf(diff2.log.rupee)
+Pacf(diff2.log.rupee)
 ```
 
 **Does the series appear to be stationary?**
 
+The series does not appear to be stationary.  The mean and the variance appears to change over time.  If we look at the plot for the first difference and second difference, the values tend to deviate from historical observations.  
 
 **Can you identify an ARIMA(p,d,q) model from these plots?**
 
-
+This model is an ARMA(1,0) model based on the ACF and PACF charts.
 
 Problem 2
 ---------
@@ -66,6 +92,26 @@ ranging from 0 to 2:
 
 
 ```{r}
+
+d <- 1
+aiccMin <- 0
+# choose p, q with AICc
+for (include.constant in c(FALSE, TRUE)) {
+    for (p in 0:4) {
+        for (q in 0:4) {
+            # work-around bug in R by manually differencing
+            fit <- Arima(diff.log.rupee, c(p,0,q), include.constant=include.constant, method="ML")
+            cat("ARIMA(", p, ",", d, ",", q, ")(constant=", include.constant, ") : ", fit$aicc, "\n", sep="");
+    
+            if (fit$aicc < aiccMin)
+              aiccMin <- fit$aicc      
+        }
+    }
+}
+
+
+print(aiccMin)
+
 # Add code to compute the AICc values.  You can modify the code from
 # http://ptrckprry.com/course/forecasting/lecture/nasdaq-arch.html
 # if you don't want to do this by hand.
@@ -73,25 +119,25 @@ ranging from 0 to 2:
 
 **Select an ARIMA(p,1,q) model.**
 
+The best fitting model is the ARIMA(1,1,0) based on the AICC value of -17763.37.  
 
 Here is code to fit the model, then compute residuals and the fitted values:
 
 ```{r}
 # Add code to fit the ARIMA model.
-# fit.mean <- ???? # replace with your arima model
+(fit.mean <- Arima(diff.log.rupee, c(1,1,0), include.constant=include.constant, method="ML"))
 ```
 
 Here are the residuals, with the last 10 residuals printed out:
 ```{r}
-# Uncomment:
-# resid <- residuals(fit.mean)
-# tail(resid, n=10)
+resid <- residuals(fit.mean)
+tail(resid, n=10)
 ```
 
 Here are the fitted values, with the last 10 fitted values printed out:
 ```{r}
-# f <- fitted.values(fit.mean)
-# tail(f, n=10)
+f <- fitted.values(fit.mean)
+tail(f, n=10)
 ```
 
 Here is the one step ahead forecast and 95% forecast interval:
@@ -99,6 +145,8 @@ Here is the one step ahead forecast and 95% forecast interval:
 ```{r}
 # Add code to compute the forecast and interval.  You can do this
 # by hand, or you can use the "forecast" function.
+forecast(fit.mean, h = 1, level = 95)
+
 ```
 
 
@@ -109,18 +157,25 @@ Here is a plot of the residuals:
 
 ```{r}
 # Add plot of the residuals.
+par(mfrow=c(1,1))
+plot(time, resid, type="l")
+
 ```
 
 Here are an ACF and PACF of the residuals:
 
 ```{r}
-# Add ACF, PACF of residuals.
+par(mfrow=c(1,2))
+Acf(resid)
+Pacf(resid)
 ```
 
 Here are an ACF and PACF of the squared residuals:
 
 ```{r}
-# Add ACF, PACF of squared residuals.
+par(mfrow=c(1,2))
+Acf(resid^2)
+Pacf(resid^2)
 ```
 
 **Use these plots to argue that the residuals, although approximately
