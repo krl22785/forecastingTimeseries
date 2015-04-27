@@ -35,7 +35,7 @@ Here is a time series plot of log.rupee, along with the ACF and PACF:
 
 ```{r}
 par(mfrow=c(1,1))
-plot(time, log.rupee, type="l",
+plot(date, log.rupee, type="l",
      xlab="Date", ylab="log.rupee")
 
 par(mfrow=c(1,2))
@@ -50,8 +50,8 @@ Here is the first difference, along with the ACF and PACF:
 diff.log.rupee <- c(NA, diff(log.rupee))
 
 par(mfrow=c(1,1))
-plot(time, diff.log.rupee, type="l",
-     xlab="Date", ylab="1st-Difference Rupee")
+plot(date, diff.log.rupee, type="l",
+     xlab="Date", ylab="1st-Difference Log Rupee")
 
 par(mfrow=c(1,2))
 Acf(diff.log.rupee)
@@ -66,8 +66,8 @@ Here is the second difference, along with the ACF and PACF:
 diff2.log.rupee <- c(NA, diff(diff.log.rupee))
 
 par(mfrow=c(1,1))
-plot(time, diff2.log.rupee, type="l",
-     xlab="Date", ylab="1st-Difference Rupee")
+plot(date, diff2.log.rupee, type="l",
+     xlab="Date", ylab="2nd-Difference Log Rupee")
 
 par(mfrow=c(1,2))
 Acf(diff2.log.rupee)
@@ -76,11 +76,11 @@ Pacf(diff2.log.rupee)
 
 **Does the series appear to be stationary?**
 
-The series does not appear to be stationary.  The mean and the variance appears to change over time.  If we look at the plot for the first difference and second difference, the values tend to deviate from historical observations.  
+The series does not appear to be stationary.  The mean and the variance appears to change as time increases.  Furthermore, with the ACF gradually decaying and the first PACF is essentially 1, this apppears to be a random walk.  
 
 **Can you identify an ARIMA(p,d,q) model from these plots?**
 
-This model is an ARMA(1,0) model based on the ACF and PACF charts.
+This model is an ARIMA(1,1,0) model based on the ACF and PACF charts.
 
 Problem 2
 ---------
@@ -109,18 +109,13 @@ for (include.constant in c(FALSE, TRUE)) {
 
 
 print(aiccMin)
-
-# Add code to compute the AICc values.  You can modify the code from
-# http://ptrckprry.com/course/forecasting/lecture/nasdaq-arch.html
-# if you don't want to do this by hand.
 ```
 
 **Select an ARIMA(p,1,q) model.**
 
-The best fitting model is the ARIMA(1,1,0) based on the AICC value of -17763.37.  
+The best fitting model is the ARIMA(1,1,0) based on the AICC value of -17763.37.  This model does not contain a constant.   
 
 Here is code to fit the model, then compute residuals and the fitted values:
-
 ```{r}
 (fit.mean <- Arima(log.rupee, c(1,1,0), include.constant=FALSE, method="ML"))
 ```
@@ -140,10 +135,7 @@ tail(f, n=10)
 Here is the one step ahead forecast and 95% forecast interval:
 
 ```{r}
-# Add code to compute the forecast and interval.  You can do this
-# by hand, or you can use the "forecast" function.
 forecast(fit.mean, h = 1, level = 95)
-
 ```
 
 
@@ -151,12 +143,10 @@ Problem 3
 ---------
 
 Here is a plot of the residuals:
-
 ```{r}
 # Add plot of the residuals.
 par(mfrow=c(1,1))
 plot(time, resid, type="l")
-
 ```
 
 Here are an ACF and PACF of the residuals:
@@ -179,7 +169,9 @@ Pacf(resid^2)
 uncorrelated, are not independent; instead, they show evidence of conditional
 heteroscedasticity.**
 
-These plots show a change in variance overtime, there indicates conditional heteroscedasticity.  Furthmore, the ACF and PACF for the resid and resid-squared shows that there continues to be signaificant amounts of variance at later lags.  
+The ACF and PACF for the residuals show a change in variance over time.  Furthermore, more than 5% of observations appear above the dotted line threshold, indicating some form of structure that is not being accounted for.  
+
+The ACF and PACF for the residuals-squared show clusters of volatility, indicating that ARCH/GARCH might be best for this dataset.  
 
 
 Problem 4
@@ -238,11 +230,9 @@ logLik(fit.var)
 **Comment on the statistical significance of the parameter values of your
 selected model.**
 
-The p-values for all of the coefficients is less than .05, therefore indicating that they are all statistically signifcant.  
+The p-values for all of the coefficients is less than .05, therefore indicating that they are all statistically signifcant.  Omega does seem to be particularly small in this formula.
 
-**Write the complete form of the ARCH or GARCH model you have selected.**
-http://en.wikipedia.org/wiki/Autoregressive_conditional_heteroskedasticity
-
+**x(t)^2 = 5.558e-08 + 1.327e-01 * eps(t-1)^2 + 8.859e-01 * x(t-1)^2**
 
 
 Problem 5
@@ -263,22 +253,17 @@ f1 <- as.numeric(forecast(fit.mean, h=1)$mean)
 (alpha <- coef(fit.var)[[2]])
 (beta <- coef(fit.var)[[3]])
 ht <- fit.var$fit[,1]^2 # ARIMA-ARCH
-# To do this, use the output from Problem 4 to determine the coefficients
-# (omega, alpha, etc.).  Use the output from Problem 2 to get the most
-# recent residuals (shocks).  If your model is GARCH(1,1), you will also need
-# the most recent conditional variance, which you can get from Problem 6.
-# 
-# Copy and paste the values and compute the conditional variance:
+
+
 h1 <- omega + alpha * (resid^2)[2235] + beta * ht[2235]
 
-# Finally, we compute the 95% forecast interval using the following command:
+
 f1 + c(-1, 1) * 1.96 * sqrt(h1)
-#forecast(fit.mean, h = 1, level = 95)
 ```
 
 **Compare this to the interval based on the ARIMA only model from Problem 2.**
 
-The ARIMA-GARCH forecast is more specific versus the ARIMA model.  The forecast intervals deviate with the data instead of expanding like the ARIMA model.  
+The ARIMA-GARCH forecast is more specific versus the ARIMA model.  The forecast intervals deviate with the data instead of expanding like the ARIMA model when variance increases.  This ARIMA-GARCH model is definitely more specific then the basic ARIMA model at prediciting expected value ranges.  
 
 
 Problem 6
@@ -305,6 +290,8 @@ plot(date, ht, type="l", col=3)
 **Do these highly volatile periods agree with those found from examination of
 the time series plot of the log exchange rates themselves?**
 
+Yes, this model captures the same bursts (shocks) in volatility as compared to the original 1-st difference log.rupee plot.  
+
 
 Problem 7
 ---------
@@ -323,6 +310,7 @@ lines(date, f - 1.96 * sqrt(ht), lty=2, col=2)
 **Using this plot, comment on the accuracy and practical usefulness of the
 forecast intervals.**
 
+The accuracy of this forecast model is very great.  The forecast range captures much of the structure in the log.rupee value.  The issue though is that it appears to have over-fit the exchange rate; for example, I would not feel comfortable using this to forecast because it is too accurate.  
 
 
 Problem 8
@@ -342,6 +330,7 @@ qqline(resid.arch, col=1, lty=2)
 **Does the model seem to have adequately described the leptokurtosis
 ("long-tailedness") in the data?**
 
+Not too well.  Some of the long-tail seems to deviate significantly.
 
 Problem 9
 ---------
@@ -359,7 +348,11 @@ The number of prediction intervals is:
 ```{r}
 # Uncomment to get a count of the number of non-missing arch residuals:
 sum(!is.na(resid.arch))
+
+113/2229
 ```
 
 **What percentage of the time did the intervals fail?
+
+About 5% of all intervals failed at forecasting the values.  
 
