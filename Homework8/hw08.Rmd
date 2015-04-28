@@ -1,8 +1,6 @@
 Homework 8
 ==========
 *Kenneth Luna*
-https://talksonmarkets.files.wordpress.com/2012/09/time-series-analysis-with-arima-e28093-arch013.pdf
-
 
 For this assignment, we will use the `forecast` and `tseries` libraries.
 
@@ -76,7 +74,7 @@ Pacf(diff2.log.rupee)
 
 **Does the series appear to be stationary?**
 
-The series does not appear to be stationary.  The mean and the variance appears to change as time increases.  Furthermore, with the ACF gradually decaying and the first PACF is essentially 1, this apppears to be a random walk.  
+The series does not appear to be stationary.  Both the mean and the variance appear to change as time increases.  Furthermore, with the ACF gradually decaying and the first PACF is essentially 1, this apppears to be a random walk.  
 
 **Can you identify an ARIMA(p,d,q) model from these plots?**
 
@@ -169,9 +167,9 @@ Pacf(resid^2)
 uncorrelated, are not independent; instead, they show evidence of conditional
 heteroscedasticity.**
 
-The ACF and PACF for the residuals show a change in variance over time.  Furthermore, more than 5% of observations appear above the dotted line threshold, indicating some form of structure that is not being accounted for.  
+The ACF and PACF of the residual-squared show that there is not clear independence.  In moments when a shock or change in variance occurs, then that shock or variance remains constant for some period time after the first instance of it.  Again, although not correlated, this shows conditional hetereoscedasticity.  
 
-The ACF and PACF for the residuals-squared show clusters of volatility, indicating that ARCH/GARCH might be best for this dataset.  
+The ACF and PACF for the residuals also shows signs of clusters where the variance deviates or increases over time indicating some structure that is not being acconted for.  
 
 
 Problem 4
@@ -180,9 +178,6 @@ Problem 4
 Here are the AICc values for the ARCH(q):
 
 ```{r}
-# Add code to compute the AICc values for the ARCH(q) models.
-# You can modify the code from 
-# http://ptrckprry.com/course/forecasting/lecture/nasdaq-arch.html
 q <- 0:10
 loglik <- rep(NA, length(q))
 N <- length(resid)
@@ -206,16 +201,12 @@ print(data.frame(q, loglik, aicc))
 Here is the AICc for the GARCH(1,1):
 
 ```{r}
-# Add code to compute the AICc values for the GARCH(1,1) models.
-# You can modify the code from 
-# http://ptrckprry.com/course/forecasting/lecture/nasdaq-arch.html
 fit <- garch(resid, c(1,1), trace=FALSE)
 loglik <- logLik(fit)
 k <- 2
 aicc <- -2 * loglik  + 2 * k * N / (N - k - 1)
 
 print(data.frame(loglik, aicc))
-
 ```
 
 
@@ -230,7 +221,7 @@ logLik(fit.var)
 **Comment on the statistical significance of the parameter values of your
 selected model.**
 
-The p-values for all of the coefficients is less than .05, therefore indicating that they are all statistically signifcant.  Omega does seem to be particularly small in this formula.
+The p-values for all of the coefficients is less than .05, therefore indicating that they are all statistically signifcant.  Something to take into consideration is how small Omega is for this formula.  It will close to 0.  
 
 **x(t)^2 = 5.558e-08 + 1.327e-01 * eps(t-1)^2 + 8.859e-01 * x(t-1)^2**
 
@@ -242,9 +233,6 @@ Problem 5
 based on your ARIMA-ARCH model.**
 
 ```{r}
-# You will need to to this by hand.  First, get the forecast (conditional
-# mean) from the end of Problem 2.  Store this in a variable called "f1":
-# f1 <- ?????
 f1 <- as.numeric(forecast(fit.mean, h=1)$mean)
 
 # Next, you need to determine the conditional variance, which we will store
@@ -254,17 +242,14 @@ f1 <- as.numeric(forecast(fit.mean, h=1)$mean)
 (beta <- coef(fit.var)[[3]])
 ht <- fit.var$fit[,1]^2 # ARIMA-ARCH
 
-
 h1 <- omega + alpha * (resid^2)[2235] + beta * ht[2235]
-
 
 f1 + c(-1, 1) * 1.96 * sqrt(h1)
 ```
 
 **Compare this to the interval based on the ARIMA only model from Problem 2.**
 
-The ARIMA-GARCH forecast is more specific versus the ARIMA model.  The forecast intervals deviate with the data instead of expanding like the ARIMA model when variance increases.  This ARIMA-GARCH model is definitely more specific then the basic ARIMA model at prediciting expected value ranges.  
-
+The ARIMA-GARCH forecast is more specific versus the ARIMA model.  The forecast intervals deviate with the data instead of expanding like the ARIMA model when variance increases.  The ARIMA-GARCH model is better at capturing hetereoscedasticity of the model - rather than expanding the interval, it makes it more specific. 
 
 Problem 6
 ---------
@@ -281,7 +266,7 @@ Here is a plot of the conditional variances:
 ```{r}
 par(mfrow=c(1,2))
 plot(date, diff.log.rupee, type="l", col=4)
-plot(date, ht, type="l", col=3)
+plot(date, ht, type="l", col=4)
 ```
 
 **Use this plot to locate bursts of high volatility.**
@@ -297,7 +282,7 @@ Problem 7
 ---------
 
 Here is a time series plot which simultaneously shows the log exchange rates,
-together with the ARIMA-ARCH one-step-ahead 95% forecast intervals based on
+together with the ARIMA-GARCH one-step-ahead 95% forecast intervals based on
 information available in the previous day:
 
 ```{r fig.width=12, fig.height=8}
@@ -310,7 +295,7 @@ lines(date, f - 1.96 * sqrt(ht), lty=2, col=2)
 **Using this plot, comment on the accuracy and practical usefulness of the
 forecast intervals.**
 
-The accuracy of this forecast model is very great.  The forecast range captures much of the structure in the log.rupee value.  The issue though is that it appears to have over-fit the exchange rate; for example, I would not feel comfortable using this to forecast because it is too accurate.  
+This forecast is very accurate at capturing both changing means and changing variances.  The concern that I have with this model is that it might be overfitting; it might be soo good at finding an interval for a specific observation that it limits its efficacy and doing the same for future values. 
 
 
 Problem 8
@@ -319,10 +304,8 @@ Problem 8
 Here is a normal probability plot of the ARCH residuals.
 
 ```{r}
-# Add code to compute the arch residuals:
 resid.arch <- resid / sqrt(ht)
 
-# Now, add code to make a normal probability plot (with the qqnorm command)
 qqnorm(resid.arch, col=2)
 qqline(resid.arch, col=1, lty=2)
 ```
@@ -330,7 +313,7 @@ qqline(resid.arch, col=1, lty=2)
 **Does the model seem to have adequately described the leptokurtosis
 ("long-tailedness") in the data?**
 
-Not too well.  Some of the long-tail seems to deviate significantly.
+The models falls slightly short at capturing the long-tailedness of the residuals based on the below the line and above the line observations.  
 
 Problem 9
 ---------
@@ -338,15 +321,11 @@ Problem 9
 Here is a count of how many prediction interval failures there were:
 
 ```{r}
-# The following command counts the number of arch residuals bigger than
-# 0.5.  Modify this command to count the number of times the prediciton
-# interval failed:
 sum(abs(log.rupee - f) > sqrt(ht) * 1.96, na.rm=TRUE)
 ```
 
 The number of prediction intervals is:
 ```{r}
-# Uncomment to get a count of the number of non-missing arch residuals:
 sum(!is.na(resid.arch))
 
 113/2229
