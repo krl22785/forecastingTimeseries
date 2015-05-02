@@ -1,0 +1,89 @@
+Project 2
+==========
+*Kenneth Luna*
+
+```{r}
+library("forecast")
+library("tseries")
+```
+
+```{r}
+data <- read.csv("tsla.csv")
+data$Date <- as.Date(data$Date, "%d-%b-%y")
+data <- data[order(data$Date),]
+
+date <- as.Date(data$Date, "%d-%b-%y")
+time <- 1:length(date)
+tsla <- data$Close
+```
+
+Convert closing stock price to log.tsla.
+
+```{r}
+log.tsla <- log(tsla)
+```
+
+
+Problem 1
+---------
+
+Here is a time series plot of log.tsla, along with the ACF and PACF:
+
+```{r}
+par(mfrow=c(1,1))
+plot(date, log.tsla, type="l",
+     xlab="Date", ylab="log.tsla")
+
+par(mfrow=c(1,2))
+Acf(log.tsla)
+Pacf(log.tsla)
+```
+
+Here is the first difference, along with the ACF and PACF:
+
+```{r}
+## Add code to compute the first difference and make the plots.
+diff.log.tsla <- c(NA, diff(log.tsla))
+
+par(mfrow=c(1,1))
+plot(date, diff.log.tsla, type="l",
+     xlab="Date", ylab="1st-Difference Log TSLA")
+
+par(mfrow=c(1,2))
+Acf(diff.log.tsla)
+Pacf(diff.log.tsla)
+```
+
+Here is the second difference, along with the ACF and PACF:
+
+```{r}
+## Add code to compute the second difference and make the plots.
+diff2.log.tsla <- c(NA, diff(diff.log.tsla))
+
+par(mfrow=c(1,1))
+plot(date, diff2.log.tsla, type="l",
+     xlab="Date", ylab="2nd-Difference Log TSLA")
+
+par(mfrow=c(1,2))
+Acf(diff2.log.tsla)
+Pacf(diff2.log.tsla)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
