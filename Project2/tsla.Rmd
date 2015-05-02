@@ -69,13 +69,240 @@ Acf(diff2.log.tsla)
 Pacf(diff2.log.tsla)
 ```
 
+**Does the series appear to be stationary?**
 
 
+**Can you identify an ARIMA(p,d,q) model from these plots?**
+
+Similar to the rupee data, an ARIMA(0,1,0) seems to be the best fit as it shows now signs of autocorrelation.  
 
 
+Problem 2
+---------
+
+Here are the AICc for all ARIMA(p,1,q) models without constant for p and q
+ranging from 0 to 2:
+
+```{r}
+d <- 1
+aiccMin <- 0
+# choose p, q with AICc
+for (include.constant in c(FALSE, TRUE)) {
+    for (p in 0:4) {
+        for (q in 0:4) {
+            # work-around bug in R by manually differencing
+            fit <- Arima(diff(log.tsla), c(p,0,q), include.constant=include.constant, method="ML")
+            cat("ARIMA(", p, ",", d, ",", q, ")(constant=", include.constant, ") : ", fit$aicc, "\n", sep="");
+    
+            if (fit$aicc < aiccMin)
+              aiccMin <- fit$aicc      
+        }
+    }
+}
 
 
+print(aiccMin)
+```
 
+
+**Select an ARIMA(p,1,q) model.**
+
+The best fitting model is the ARIMA(0,1,0) based on the AICC value of -4676.754.  This model does consist of a constant.  This holds consistent with our preliminary observation.  
+
+Here is code to fit the model, then compute residuals and the fitted values:
+```{r}
+(fit.mean <- Arima(log.tsla, c(0,1,0), include.constant=TRUE, method="ML"))
+```
+
+Here are the residuals, with the last 10 residuals printed out:
+```{r}
+resid <- as.numeric(residuals(fit.mean))
+tail(resid, n=10)
+```
+
+Here are the fitted values, with the last 10 fitted values printed out:
+```{r}
+f <- fitted.values(fit.mean)
+tail(f, n=10)
+```
+
+Here is the one step ahead forecast and 95% forecast interval:
+
+```{r}
+forecast(fit.mean, h = 1, level = 95)
+```
+
+Problem 3
+---------
+
+Here is a plot of the residuals:
+```{r}
+# Add plot of the residuals.
+par(mfrow=c(1,1))
+plot(time, resid, type="l")
+```
+
+Here are an ACF and PACF of the residuals:
+
+```{r}
+par(mfrow=c(1,2))
+Acf(resid)
+Pacf(resid)
+```
+
+Here are an ACF and PACF of the squared residuals:
+
+```{r}
+par(mfrow=c(1,2))
+Acf(resid^2)
+Pacf(resid^2)
+```
+
+
+Problem 4
+---------
+
+Here are the AICc values for the ARCH(q):
+
+```{r}
+q <- 0:10
+loglik <- rep(NA, length(q))
+N <- length(resid)
+
+for (i in 1:length(q)) {
+    if (q[i] == 0) {
+        loglik[i] <- -0.5 * N * (1 + log(2 * pi * mean(resid^2)))
+    } else {
+        fit <- garch(resid, c(0,q[i]), trace=FALSE)
+        loglik[i] <- logLik(fit)
+    }
+}
+
+k <- q + 1
+aicc <- -2 * loglik  + 2 * k * N / (N - k - 1)
+
+print(data.frame(q, loglik, aicc))
+```
+
+Here is the AICc for the GARCH(1,1):
+
+```{r}
+fit <- garch(resid, c(1,1), trace=FALSE)
+loglik <- logLik(fit)
+k <- 2
+aicc <- -2 * loglik  + 2 * k * N / (N - k - 1)
+
+print(data.frame(loglik, aicc))
+```
+
+
+Here are the summary and log likelihood of the selected model:
+
+```{r}
+fit.var <- garch(resid, c(0,5), trace=FALSE)
+summary(fit.var)
+logLik(fit.var)
+```
+
+
+**Comment on the statistical significance of the parameter values of your selected model.**
+
+The p-values .....
+
+Problem 5
+---------
+
+**Construct a 95% one step ahead forecast interval for the log exchange rate, based on your ARIMA-ARCH model.**
+
+```{r}
+coef(fit.var)
+(omega <- coef(fit.var)[[1]])
+(alpha <- coef(fit.var)[-1])
+
+observations <- (resid^2)[1215:1219]
+
+(h1 <- omega + sum(alpha * observations))
+
+f1 <- as.numeric(forecast(fit.mean, h=1)$mean)
+
+# ARIMA-ARCH inteval
+f1 + sqrt(h1) * c(-1.96, 1.96) # 95%
+```
+
+**Compare this to the interval based on the ARIMA only model from Problem 2.**
+
+Problem 6
+---------
+
+Here are the conditional variances, with the last 10 values printed out:
+
+```{r}
+ht <- fit.var$fit[,1]^2 # ARIMA-ARCH
+tail(ht, n=10)
+```
+
+Here is a plot of the conditional variances:
+
+```{r}
+par(mfrow=c(1,2))
+plot(date, diff.log.tsla, type="l", col=4)
+plot(date, ht, type="l", col=4)
+```
+
+**Use this plot to locate bursts of high volatility.**
+
+**Do these highly volatile periods agree with those found from examination of
+the time series plot of the log exchange rates themselves?**
+
+Problem 7
+---------
+
+Here is a time series plot which simultaneously shows the log exchange rates,
+together with the ARIMA-GARCH one-step-ahead 95% forecast intervals based on
+information available in the previous day:
+
+```{r fig.width=12, fig.height=8}
+par(mfrow=c(1,1))
+plot(date, log.tsla, type="l")
+lines(date, f + 1.96 * sqrt(ht), lty=2, col=2)
+lines(date, f - 1.96 * sqrt(ht), lty=2, col=2)
+```
+
+**Using this plot, comment on the accuracy and practical usefulness of the
+forecast intervals.**
+
+Problem 8
+---------
+
+Here is a normal probability plot of the ARCH residuals.
+
+```{r}
+resid.arch <- resid / sqrt(ht)
+
+qqnorm(resid.arch, col=2)
+qqline(resid.arch, col=1, lty=2)
+```
+
+**Does the model seem to have adequately described the leptokurtosis ("long-tailedness") in the data?**
+
+Problem 9
+---------
+
+Here is a count of how many prediction interval failures there were:
+
+```{r}
+sum(abs(log.tsla - f) > sqrt(ht) * 1.96, na.rm=TRUE)
+```
+
+The number of prediction intervals is:
+```{r}
+sum(!is.na(resid.arch))
+60/1214
+```
+
+**What percentage of the time did the intervals fail?
+
+About 5% of all intervals failed at forecasting the values.  
 
 
 
