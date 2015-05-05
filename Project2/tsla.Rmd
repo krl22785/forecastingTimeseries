@@ -17,6 +17,14 @@ time <- 1:length(date)
 tsla <- data$Close
 ```
 
+
+```{r}
+par(mfrow=c(1,1))
+plot(date, tsla, type="l",
+     xlab="Date", ylab="Closing Price", main = "Figure 1\nTSLA Price")
+```
+
+
 Convert closing stock price to log.tsla.
 
 ```{r}
@@ -32,11 +40,11 @@ Here is a time series plot of log.tsla, along with the ACF and PACF:
 ```{r}
 par(mfrow=c(1,1))
 plot(date, log.tsla, type="l",
-     xlab="Date", ylab="log.tsla")
+     xlab="Date", ylab="log.tsla", main = "Figure 2\nLog(TSLA)")
 
 par(mfrow=c(1,2))
-Acf(log.tsla)
-Pacf(log.tsla)
+Acf(log.tsla, main = "Figure 3\nLog(TSLA)")
+Pacf(log.tsla, main = "Figure 4\nLog(TSLA)")
 ```
 
 Here is the first difference, along with the ACF and PACF:
@@ -47,11 +55,11 @@ diff.log.tsla <- c(NA, diff(log.tsla))
 
 par(mfrow=c(1,1))
 plot(date, diff.log.tsla, type="l",
-     xlab="Date", ylab="1st-Difference Log TSLA")
+     xlab="Date", ylab="1st-Difference Log TSLA", main = "Figure 5\n1st-Diff. Log(TSLA)")
 
 par(mfrow=c(1,2))
-Acf(diff.log.tsla)
-Pacf(diff.log.tsla)
+Acf(diff.log.tsla, main = "Figure 6\n1st-Diff. Log(TSLA)")
+Pacf(diff.log.tsla, main = "Figure 7\n1st-Diff. Log(TSLA)")
 ```
 
 Here is the second difference, along with the ACF and PACF:
@@ -62,11 +70,11 @@ diff2.log.tsla <- c(NA, diff(diff.log.tsla))
 
 par(mfrow=c(1,1))
 plot(date, diff2.log.tsla, type="l",
-     xlab="Date", ylab="2nd-Difference Log TSLA")
+     xlab="Date", ylab="2nd-Difference Log TSLA", main="Figure 8\n2nd-Diff. Log(TSLA)")
 
 par(mfrow=c(1,2))
-Acf(diff2.log.tsla)
-Pacf(diff2.log.tsla)
+Acf(diff2.log.tsla, main = "Figure 9\n2nd-Diff. Log(TSLA)")
+Pacf(diff2.log.tsla, main = "Figure 10\n2nd-Diff. Log(TSLA)")
 ```
 
 **Does the series appear to be stationary?**
@@ -111,7 +119,7 @@ The best fitting model is the ARIMA(0,1,0) based on the AICC value of -4676.754.
 
 Here is code to fit the model, then compute residuals and the fitted values:
 ```{r}
-(fit.mean <- Arima(log.tsla, c(0,1,0), include.constant=TRUE, method="ML"))
+(fit_mean <- Arima(log.tsla, c(0,1,0), include.constant=TRUE, method="ML"))
 ```
 
 Here are the residuals, with the last 10 residuals printed out:
@@ -139,23 +147,23 @@ Here is a plot of the residuals:
 ```{r}
 # Add plot of the residuals.
 par(mfrow=c(1,1))
-plot(time, resid, type="l")
+plot(time, resid, type="l",  main = "Figure 11\nResiduals")
 ```
 
 Here are an ACF and PACF of the residuals:
 
 ```{r}
 par(mfrow=c(1,2))
-Acf(resid)
-Pacf(resid)
+Acf(resid,  main = "Figure 12\nACF Residuals")
+Pacf(resid,  main = "Figure 13\nPACF Residuals")
 ```
 
 Here are an ACF and PACF of the squared residuals:
 
 ```{r}
 par(mfrow=c(1,2))
-Acf(resid^2)
-Pacf(resid^2)
+Acf(resid^2, main = "Figure 14\nACF Residuals^2")
+Pacf(resid^2, main = "Figure 15\nACF Residuals^2")
 ```
 
 
@@ -307,7 +315,11 @@ About 5% of all intervals failed at forecasting the values.
 
 
 
-
+Sys.getenv("PATH")
+#                                                      PATH 
+#"/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/texbin" 
+x <- matrix(1:6, nrow=2, dimnames=list(c('a','b'),c('c','d','this that')))
+latex(x)
 
 
 
