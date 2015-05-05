@@ -271,7 +271,9 @@ information available in the previous day:
 
 ```{r fig.width=12, fig.height=8}
 par(mfrow=c(1,1))
-plot(date, log.tsla, type="l")
+#plot(date, f, type="l", main = "Figure 18\nLog(TSLA) ARIMA-ARCH Model")
+#lines(date, log.tsla, type="l", main = "Figure 18\nLog(TSLA) ARIMA-ARCH Model", col = 2)
+plot(date, log.tsla, type="l", main = "Figure 18\nLog(TSLA) ARIMA-ARCH Model")
 lines(date, f + 1.96 * sqrt(ht), lty=2, col=2)
 lines(date, f - 1.96 * sqrt(ht), lty=2, col=2)
 ```
@@ -322,7 +324,9 @@ x <- matrix(1:6, nrow=2, dimnames=list(c('a','b'),c('c','d','this that')))
 latex(x)
 
 
-
-
+exp(5.354979)  
+exp(5.490047)
+exp(5.353059)
+exp(5.491966)
 
 
