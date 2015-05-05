@@ -119,7 +119,7 @@ The best fitting model is the ARIMA(0,1,0) based on the AICC value of -4676.754.
 
 Here is code to fit the model, then compute residuals and the fitted values:
 ```{r}
-(fit_mean <- Arima(log.tsla, c(0,1,0), include.constant=TRUE, method="ML"))
+(fit.mean <- Arima(log.tsla, c(0,1,0), include.constant=TRUE, method="ML"))
 ```
 
 Here are the residuals, with the last 10 residuals printed out:
