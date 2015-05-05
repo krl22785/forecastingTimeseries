@@ -253,8 +253,8 @@ Here is a plot of the conditional variances:
 
 ```{r}
 par(mfrow=c(1,2))
-plot(date, diff.log.tsla, type="l", col=4)
-plot(date, ht, type="l", col=4)
+plot(date, diff.log.tsla, type="l", main = "Figure 16\n1st-Diff Log(TSLA)")
+plot(date, ht, type="l", main = "Figure 17\nConditional Variance")
 ```
 
 **Use this plot to locate bursts of high volatility.**
