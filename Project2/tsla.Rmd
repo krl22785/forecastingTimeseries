@@ -207,7 +207,7 @@ print(data.frame(loglik, aicc))
 Here are the summary and log likelihood of the selected model:
 
 ```{r}
-fit.var <- garch(resid, c(0,5), trace=FALSE)
+fit.var <- garch(resid, c(0,4), trace=FALSE)
 summary(fit.var)
 logLik(fit.var)
 ```
@@ -227,7 +227,7 @@ coef(fit.var)
 (omega <- coef(fit.var)[[1]])
 (alpha <- coef(fit.var)[-1])
 
-observations <- (resid^2)[1215:1219]
+observations <- (resid^2)[1216:1219]
 
 (h1 <- omega + sum(alpha * observations))
 
@@ -288,8 +288,8 @@ Here is a normal probability plot of the ARCH residuals.
 
 ```{r}
 resid.arch <- resid / sqrt(ht)
-
-qqnorm(resid.arch, col=2)
+par(mfrow=c(1,1))
+qqnorm(resid.arch, col=2, main = "Figure 19\nNormal Q-Q Plot")
 qqline(resid.arch, col=1, lty=2)
 ```
 
@@ -307,7 +307,7 @@ sum(abs(log.tsla - f) > sqrt(ht) * 1.96, na.rm=TRUE)
 The number of prediction intervals is:
 ```{r}
 sum(!is.na(resid.arch))
-60/1214
+60/1214 * 100
 ```
 
 **What percentage of the time did the intervals fail?
@@ -324,8 +324,8 @@ x <- matrix(1:6, nrow=2, dimnames=list(c('a','b'),c('c','d','this that')))
 latex(x)
 
 
-exp(5.354979)  
-exp(5.490047)
+exp(5.363358)  
+exp(5.481668)
 exp(5.353059)
 exp(5.491966)
 

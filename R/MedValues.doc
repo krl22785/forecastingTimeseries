@@ -1,0 +1,16 @@
+
+% Table created by stargazer v.5.0 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Fri, Oct 03, 2014 - 19:17:58
+\begin{table}[!htbp] \centering 
+  \caption{} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+Statistic & \multicolumn{1}{c}{N} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{St. Dev.} & \multicolumn{1}{c}{Min} & \multicolumn{1}{c}{Max} \\ 
+value & 2 & 74,673.750 & 6,065.916 & 70,384.500 & 78,963.000 \\ 
+value.1 & 2 & 91,465.500 & 3,584.324 & 88,931 & 94,000 \\ 
+value.2 & 2 & 89,966.500 & 5,260.167 & 86,247 & 93,686 \\ 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\end{table} 

@@ -229,10 +229,18 @@ The p-values for all of the coefficients is less than .05, therefore indicating 
 Problem 5
 ---------
 
-**Construct a 95% one step ahead forecast interval for the log exchange rate,
-based on your ARIMA-ARCH model.**
+**Construct a 95% one step ahead forecast interval for the log tsla based on your ARIMA-ARCH model.**
 
 ```{r}
+coef(fit.var)
+(omega <- coef(fit.var)[[1]])
+(alpha <- coef(fit.var)[-1])
+
+observations <- (resid^2)[1215:1219]
+
+(h1 <- omega + sum(alpha * observ)
+
+
 f1 <- as.numeric(forecast(fit.mean, h=1)$mean)
 
 # Next, you need to determine the conditional variance, which we will store

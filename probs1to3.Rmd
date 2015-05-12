@@ -37,11 +37,9 @@ yesterday <- c(NA, today[-length(today)])
 
 library("ggplot2")
 
-ggplot() + 
-  geom_line(aes(date, today, linetype = "dotted")) + 
-  geom_line(aes(date, yesterday, linetype = "dashed")) + 
-  scale_linetype_manual(name = "Legend", values=c("dotted", "dashed"), labels = c("Today", "Yesterday")) + theme(legend.position = "bottom") + ylab("Mean-Adjusted Russell") + xlab("Date")
-
+ggplot() + geom_line(aes(date, today, linetype = "dotted")) + geom_line(aes(date, yesterday, linetype = "dashed")) + 
+  scale_linetype_manual(name = "Legend", values=c("dotted", "dashed"), labels = c("Today", "Yesterday")) + theme(legend.position = "bottom") + 
+  ylab("Mean-Adjusted Russell") + xlab("Date")
 ```
 
 Next, here is a plot of Today's Russell versus time, as well as
@@ -49,13 +47,9 @@ Next, here is a plot of Today's Russell versus time, as well as
 
 
 ```{r}
-
-ggplot() + 
-  geom_line(aes(date, today, linetype = "dotted")) + 
-  geom_line(aes(date, 0.5 *yesterday, linetype = "dashed"))  + 
+ggplot() + geom_line(aes(date, today, linetype = "dotted")) + geom_line(aes(date, 0.5 *yesterday, linetype = "dashed"))  + 
   scale_linetype_manual(name = "Legend", values=c("dotted", "dashed"), labels = c("Today", "(.05) * Yesterday")) + theme(legend.position = "bottom") + 
   ylab("Mean-Adjusted Russell") + xlab("Date")
-
 ```
 
 
@@ -65,7 +59,8 @@ Part B
 **Based on these two plots, which seems to be a better forecast of Today's
 Russell: Yesterday's Russell, or 0.5 (Yesterday's Russell)?**
 
-Yesterday's Russell is a better forecast of Today's Russell. Where the Russell Index was yesterday is a strong indicator of where it will likely be today due to a high degree of autocorrelation.  0.5 (Yesterday's Russell) under-estimates both the decreases and increases in Today's Russell.  
+Yesterday's Russell is a better forecast of Today's Russell. Where the Russell Index is today is a strong indicator of where it will likely be tomorrow.  Therefore, adjusting for Yesterday's Russell is highly correlated to Today's Russell.  0.5 (Yesterday's Russell) under-estimates both the drops and increases in the actually RI.  
+
 
 Part C
 ------
@@ -79,7 +74,11 @@ Error2 <- mean(((0.5 * yesterday) - today) ^ 2, na.rm = TRUE)
 
 Error1
 Error2
-
+# Replace this comment with code to compute average squared forecast
+# errors for the two forecasts (you will compute two numbers: one for
+# 'yesterday', and one for '0.5 yesterday').
+#
+# Hint: use the mean function.
 ```
 
 **Based on this, which one was better?**
@@ -96,14 +95,12 @@ Part A
 Here is a plot of Today's Russell versus Yesterday's Russell:
 
 ```{r}
-
 ggplot() + geom_point(aes(yesterday, today), alpha = .5) + ylab("Today") + xlab("Yesterday")
-
 ```
 
 **Describe any patterns you see.**
 
-There appears to be a very strong positively linear relationship.  If we were to draw a straight line to explain the relationship, we would realize some noise (variance between expected Y versus actual Y).  The variance is limited in size.  Thus I will conclude that Yesterday's Russell Index is a very good indicator of Today's Russell Index.  
+There appears to be a very strong positively linear relationship.  If we were to draw a straight line to explain the relationship, we would realize some noise (variance between expected Y versus actual Y.  Fortunately, the variance is limited in size.  Thus I will conclude that Yesterday's Russell Index is a very good indicator of Today's Russell Index.  
 
 Part B
 ------
@@ -111,10 +108,8 @@ Part B
 Here is a linear regression fit of Today's Russell on Yesterday's Russell:
 
 ```{r}
-
 model <- lm(today ~ yesterday)
 summary(model)
-
 ```
 
 **What is the prediction of Today's Russell implied by the regression
@@ -126,7 +121,7 @@ $$today = .9999972 * yesterday + .1493892$$
 
 **Is this consistent with your answers to Problem 1, parts B and C?**
 
-Yes this results holds consistent with my findings in Problem 1.  Yesterday's Russell Index is highly correlated with Today's Russell Index as the coefficient value has an absolute value of 1.  I do think there is an issue with this model because the p-value is essentially 0.  This might question the validity of this model.  
+Yes this results holds consistent with my findings in Problem 1.  Yesterday's Russell Index is highly correlated with Today's Russell Index.  
 
 
 
@@ -136,9 +131,7 @@ Part C
 
 The 95% confidence interval for the slope is
 ```{r}
-
 confint(model, "yesterday", level = .95)
-
 ```
 
 **Is the slope in your fitted regression significantly different from 1?**
@@ -148,14 +141,12 @@ No, the slope in my fitted regression is not significantly different from 1.  It
 
 The 95% confidence interval for the intercept is
 ```{r}
-
 confint(model, "(Intercept)")
-
 ```
 
 **Briefly comment on the intercept as well.**
 
-This intercept value has limited reliability based on its high p-value.  
+This intercept value has limited reliability based on high p-value.  Based on its 95% confidence interval, it appears that the intercept is attempting to account for any noise between yesterday's RI versus today's RI.  
 
 
 Part D
@@ -170,9 +161,7 @@ Part E
 Here is the correlation coefficient between Today's Russell and Yesterday's Russell:
 
 ```{r}
-
 cor(today, yesterday, use = "complete.obs")
-
 ```
 
 **Based on this, how strong is the linear association between Today's Russell
@@ -215,15 +204,13 @@ t.test(ret.today)
 **Are the mean returns significantly different from zero?  Interpret your
 findings.**
 
-The mean returns are different from zero.  At a .000195 compounded daily for several years, one can infer that this not a zero return over time.
-
+Both mean results are significantly close to 0.  Based on these results, we can be 95% percent confident that the mean return on the RI is 0 in our  dataset.  
 
 Part B
 ------
 
 Here is a histogram of the Russell returns:
 ```{r}
-
 ggplot() + geom_histogram(aes(ret.today), stat = "bin", binwidth = .005) + 
   ylab("Count") + xlab("RI Return")
 
@@ -231,16 +218,12 @@ ggplot() + geom_histogram(aes(ret.today), stat = "bin", binwidth = .005) +
 
 Here is a boxplot:
 ```{r}
-
 ggplot() + geom_boxplot(aes(x = factor(0), y = ret.today)) + coord_flip() + xlab("") + scale_x_discrete(breaks = NULL) + ylab("RI Returns")
-
 ```
 
 Finally, here is a normal quantile-quantile plot:
 ```{r}
-
 qplot(sample = ret.today, stat="qq")
-
 ```
 
 **Do you think that the Russell returns are normally distributed?  Explain.**
@@ -254,17 +237,13 @@ Part C
 
 Here is a plot of today's return versus yesterday's return
 ```{r}
-
 ggplot() + geom_point(aes(ret.today, ret.yesterday), alpha = .5, size = 1) + ylab("Yesterday's Return") + xlab("Today's Returns")
-
 ```
 
 Here is a zoomed in plot:
 ```{r}
-
 ggplot() + geom_point(aes(ret.today, ret.yesterday), alpha = .5, size = 1) + ylab("Yesterday's Return") + xlab("Today's Returns") + 
   xlim(-.05,.05) + ylim(-.05,.05)
-
 ```
 
 

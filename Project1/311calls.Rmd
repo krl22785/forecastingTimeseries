@@ -10,7 +10,9 @@ library("plyr") ## for data wrangling
 library("ggplot2") ## for data visualizations 
 ```
 
-The dataset is the number of calls to 311 services in NYC pertaining to housing complaints.  
+The dataset is the number of calls to 311 services in NYC pertaining to housing complaints.  The dataset is from Jan 1 '13 until today.  In aggregate, the dataset has approximately 1.4M records.  
+
+The initial dataset is a record of each call with a date and timestamp.  Preprocessing required grouping this dataset by day, resulting in about 820 records.  
 
 ```{r}
 data <- read.csv("/Users/krluna/forecastingTimeseries/Project1/311_data.csv")
@@ -21,7 +23,8 @@ tempdata <- ddply(data, c("Created.Date"), summarise,
                  calls = length(count)
                  )
 
-newdata <- tempdata[-c(211),]
+newdata <- tempdata[-c(821),]
+#newdata <- tempdata1[-c(1,2,3,4),]
 
 date <- newdata$Created.Date
 time <- 1:length(date)
@@ -39,19 +42,19 @@ plot(date, calls, type="l",
 par(mfrow=c(1,2))
 Acf(calls)
 Pacf(calls)
-
 ```
 
 Preliminary Observations
 
-311 Calls does not seem to have any seasonality from January 1st 2015 until today.  The initial patterns that stand out of this preliminary plot are the spikes in early January and mid February.  Anecdotally, one might infer that this increase in calls to 311 is a function of adverse weather the in NYC Metropolitan Area, leading tenants to call and/or complain about lack of heating.  
+311 Calls do appear to have seasonality from Jan '13 until today.  What we observe is an increase in calls to 311 during the winter months, likely driven by heating complaints, and then realize a signficant drop off during the spring, summer and early fall months.  
+
+We also observe several shocks in our dataset.  These shocks are call volumes that are significantly higher than that of the average.  These are likely driven by snow storms.  
 
 There does appear to be some fluctation in call volume based on the day of the week.  The plot shows bumps with the occasional drop off each 6 or 7 days.  This trend holds true across the entire, minus the 3 or 4 observations that appear to be days that realized high call volumes. 
 
-Based on this data set, we see that summer months do seem to be a bit quieter in terms of call volume.  September through October of 2014 appear to have lower call volumes but picks up come November.  
+The current ACF and PACF models don't tell us much.  As a result, we will be using log(call) values and seasonally adjust our observations.  
 
-Based on the Auto-Correlation Function and Partial Auto-Correlation Function, we might suspect this plot to be an Auto-Regressive modeel.  The correlogram dies down while the parti correlogram cuts off after lag-1.  
-
+Remove Seasonality 
 
 ```{r}
 
@@ -61,7 +64,6 @@ diff2.log.calls <- c(NA, diff(diff.log.calls))
 
 ```
 
-We decided to take logs instead of using absolute values in order to scale down some of the spikes in call volumes occurring in January and Febuary.  The two highest days in 311 calls were more than 3x larger than the average call volumne per day for this specific time period.  
 
 ```{r}
 
@@ -75,18 +77,63 @@ Pacf(log.calls)
 
 ```
 
+We decided to take logs instead of using absolute values in order to scale down some of the spikes in call volumes occurring in January and Febuary.  The two highest days in 311 calls were more than 3x larger than the average call volumne per day for this specific time period.  
+
+Based on our observation of log(calls), we continue to see a high level of seasonality.  Simliar to the prior plot, there are drops in 311 calls during the summer months and it picks up come colder weather.  As a result of this seasonality, our current plot is not stationary and will require seasonal adjustment.  
+
+We will take the monthly averages of the log(call) values and subtract that from each observation.  
+
+```{r}
+
+month <- factor(months(date), levels=format(ISOdate(2000,1:12,1),"%B"))
+month.avg <- c(by(log.calls, month, mean))
+
+print(month.avg)
+
+avgSteps <- stepfun(1:11, month.avg, f = 0)
+plot(avgSteps, 
+     xlab = "Monthly Average", 
+     ylab = "Month", 
+     main = "Monthly Log(Call) Averages")
+
+```
+
+The following plot is a stepwise representation of the monthly averages across the 2+ years.  We decided to take the monthly average across all the years instead of each month-year pairing because there was trend overtime, therefore activity in a given month and year were similar to that of the same month in a different year.  
+
+```{r}
+
+log.calls.adj <- log.calls - month.avg[month]
+
+par(mfrow=c(1,1))
+plot(date, log.calls.adj, type="l",
+     xlab="Date", ylab="Log(Calls) Adj.")
+
+par(mfrow=c(1,2))
+Acf(log.calls.adj)
+Pacf(log.calls.adj)
+```
+
+
+
+```{r}
+
+diff.log.calls.adj <- c(NA, diff(log.calls.adj))
+diff2.log.calls.adj <- c(NA, diff(diff.log.calls.adj))
+
+```
+
 
 Take the first difference:
 
 ```{r}
 
 par(mfrow=c(1,1))
-plot(date, diff.log.calls, type="l",
-     xlab="Date", ylab="Diff. Log(Calls)")
+plot(date, diff.log.calls.adj, type="l",
+     xlab="Date", ylab="Diff. Log(Calls) Adj.")
 
 par(mfrow=c(1,2))
-Acf(diff.log.calls)
-Pacf(diff.log.calls)
+Acf(diff.log.calls.adj)
+Pacf(diff.log.calls.adj)
 
 ```
 
@@ -95,12 +142,12 @@ Take teh second difference:
 ```{r}
 
 par(mfrow=c(1,1))
-plot(date, diff2.log.calls, type="l",
+plot(date, diff2.log.calls.adj, type="l",
      xlab="Date", ylab="Diff2. Log(Calls)")
 
 par(mfrow=c(1,2))
-Acf(diff2.log.calls)
-Pacf(diff2.log.calls)
+Acf(diff2.log.calls.adj)
+Pacf(diff2.log.calls.adj)
 
 ```
 
@@ -111,26 +158,26 @@ Based on this preliminary analysis, here are the AICC values for the models unde
 
 ```{r}
 
-fit.00 <- Arima(calls, c(0, 0, 0), include.constant=FALSE)
-fit.01 <- Arima(calls, c(0, 0, 1), include.constant=FALSE)
-fit.02 <- Arima(calls, c(0, 0, 2), include.constant=FALSE)
-fit.10 <- Arima(calls, c(1, 0, 0), include.constant=FALSE)
-fit.11 <- Arima(calls, c(1, 0, 1), include.constant=FALSE)
-fit.12 <- Arima(calls, c(1, 0, 2), include.constant=FALSE)
-fit.20 <- Arima(calls, c(2, 0, 0), include.constant=FALSE)
-fit.21 <- Arima(calls, c(2, 0, 1), include.constant=FALSE)
-fit.22 <- Arima(calls, c(2, 0, 2), include.constant=FALSE)
+fit.00 <- Arima(log.calls.adj, c(0, 0, 0), include.constant=FALSE)
+fit.01 <- Arima(log.calls.adj, c(0, 0, 1), include.constant=FALSE)
+fit.02 <- Arima(log.calls.adj, c(0, 0, 2), include.constant=FALSE)
+fit.10 <- Arima(log.calls.adj, c(1, 0, 0), include.constant=FALSE)
+fit.11 <- Arima(log.calls.adj, c(1, 0, 1), include.constant=FALSE)
+fit.12 <- Arima(log.calls.adj, c(1, 0, 2), include.constant=FALSE)
+fit.20 <- Arima(log.calls.adj, c(2, 0, 0), include.constant=FALSE)
+fit.21 <- Arima(log.calls.adj, c(2, 0, 1), include.constant=FALSE)
+fit.22 <- Arima(log.calls.adj, c(2, 0, 2), include.constant=FALSE)
 
 # With constant:
-fit.00c <- Arima(calls, c(0, 0, 0), include.constant=TRUE)
-fit.01c <- Arima(calls, c(0, 0, 1), include.constant=TRUE)
-fit.02c <- Arima(calls, c(0, 0, 2), include.constant=TRUE)
-fit.10c <- Arima(calls, c(1, 0, 0), include.constant=TRUE)
-fit.11c <- Arima(calls, c(1, 0, 1), include.constant=TRUE)
-fit.12c <- Arima(calls, c(1, 0, 2), include.constant=TRUE)
-fit.20c <- Arima(calls, c(2, 0, 0), include.constant=TRUE)
-fit.21c <- Arima(calls, c(2, 0, 1), include.constant=TRUE)
-fit.22c <- Arima(calls, c(2, 0, 2), include.constant=TRUE)
+fit.00c <- Arima(log.calls.adj, c(0, 0, 0), include.constant=TRUE)
+fit.01c <- Arima(log.calls.adj, c(0, 0, 1), include.constant=TRUE)
+fit.02c <- Arima(log.calls.adj, c(0, 0, 2), include.constant=TRUE)
+fit.10c <- Arima(log.calls.adj, c(1, 0, 0), include.constant=TRUE)
+fit.11c <- Arima(log.calls.adj, c(1, 0, 1), include.constant=TRUE)
+fit.12c <- Arima(log.calls.adj, c(1, 0, 2), include.constant=TRUE)
+fit.20c <- Arima(log.calls.adj, c(2, 0, 0), include.constant=TRUE)
+fit.21c <- Arima(log.calls.adj, c(2, 0, 1), include.constant=TRUE)
+fit.22c <- Arima(log.calls.adj, c(2, 0, 2), include.constant=TRUE)
 
 models <- data.frame(p = rep(c(0, 0, 0, 1, 1, 1, 2, 2, 2), 2),
                      d = rep(0, 18),
@@ -152,12 +199,12 @@ models <- data.frame(p = rep(c(0, 0, 0, 1, 1, 1, 2, 2, 2), 2),
 ```
 
 
-The p, d, q selected based on AICC is the ARIMA(1,0,2) with constant with an AICC value of 3361.741.  
+The p, d, q selected based on AICC is the ARIMA(2, 0, 2) without a constang with an AICC of 735.5825.   
 
 Here is the estimated model:
 ```{r}
 
-fit <- Arima(calls, c(1,0,2), include.constant = TRUE)
+fit <- Arima(log.calls.adj, c(2,0,2), include.constant = FALSE)
 print(fit)
 
 (1-pnorm(abs(fit$coef)/sqrt(diag(fit$var.coef))))*2
@@ -166,7 +213,7 @@ print(fit)
 
 Based on the coefficient values and the standard errors, it appears the ma1 coefficient is not statistically significant.  It has a z-value of less than 2 and its p-value is .2.  
 
-[x(t) - 2056.6] = .9011 * [x(t-1) - 2056.6] + eps(t) + -.1231 * eps(t-1) + -.4004 * eps(t-2)
+x(t) = .7921 * x(t-1) + -.3662 * x(t-2) + eps(t) + -.2282 * eps(t-1) + -.1220 * eps(t-2)
 
 
 ```{r}
