@@ -34,7 +34,7 @@ plot(date, spread, type="l",
 
 **Does the series appear to be stationary?**
 
-This plot does not appear to be stationary. Although the mean remains constant, the variance seems to vary significantly.  
+This plot does not appear to be stationary. Although the mean remains constant, the variance seems to vary significantly towards the tail end of the plot.  
 
 Here are an ACF and PACF for the spread:
 
@@ -47,7 +47,7 @@ Pacf(spread)
 **Based on the ACF and the PACF of the raw data, explain why an AR(1) model
 might be reasonable.**
 
-have to find reason for this **** 
+This model appears to be an AR(1) model because the correlogram dies down and the partial correlogram cuts off at lag-1.  
 
 Problem 2
 ---------
@@ -60,7 +60,7 @@ Here we estimate an AR(1) model via least squares regression:
 # squares regression fit.
 
 lag.spread <- c(NA, spread)[1:n]
-fit.lm <- lm(spread ~ lag.spread)   #???? # replace with appropriate call to "lm" command
+fit.lm <- lm(spread ~ lag.spread)   
 
 # Use the "summary" command to see the standard errors from the regression
 # fit.
@@ -89,11 +89,13 @@ print(n)
 **Does this p-value provide strong evidence against the random walk
 hypothesis?**
 
-Since tau.mu is not great than -2.57 and less than -.42, we reject the null hypothesis in this case. 
+The p-value is between .025 and .05.  
+
+Yes, this is strong evidence against the random walk hypothesis as the H0 was rejected.  Again, H0 is that rho = 1, which is a random walk but in this case we reject it, therefore H0 is not equal to one, leading towards NOT being a random walk.  
 
 **Is rho-hat significantly less than 1 at level .01?**
 
-
+Since tau.mu is not greater than -2.58 and less than -.42, we reject the null hypothesis in this case.  We reject that rho is equal to one.  It is less than 1 at a .01 level.  
 
 Problem 3
 ---------
@@ -125,6 +127,7 @@ sd(diff.spread)
 differenced data, argue that a random walk without drift might also provide a
 reasonable model for the UK interest rate spread.**
 
+The ACF and PACF indicate that there exists no trends in the differenced data, therefore it is trend stationary.   Because it is trend stationary, a random walk with drift might not be much better than a random-walk without drift.  
 
 
 Problem 4
@@ -133,28 +136,51 @@ Problem 4
 **Perform the Dickey-Fuller test (tau[mu]) of driftless random walk versis
 stationary AR(1).**
 
+```{r}
+# Uncomment the following command to create a lagged-version of the
+# spread variable, then use the "lm" command to perform a least
+# squares regression fit.
+
+lag.spread <- c(NA, spread)[1:n]
+ar.fit.lm <- lm(spread ~ lag.spread + time)   
+
+# Use the "summary" command to see the standard errors from the regression
+# fit.
+summary(ar.fit.lm) # Uncomment this line
+```
+
 
 **Compute the approximate p-value for the AR(1) hypothesis, based on the
 Dickey-Fuller table.**
 
+```{r}
+(tau.t.spread <- (0.8571932 - 1) / (0.0452621))
+# add code to compute the t statistic.  You will need to copy and paste
+# the appropriate values from the "summary(fit.lm)" output.
+```
 
+Tau.t is equal to -3.155108.  The tau.t is greater than -3.45 and less than -3.15, indicating it has a p-value of between .05 to .10.  
 
 **Is rho hat significantly less than 1 at level .01?**
 
-
+Because the tau.t is not less than -4.04, we do not reject the null hypothesis of random walk with drift at level .01. 
 
 **Accordingly, based on a hypothesis test at level .01, decide whether the UK
 interest rate spreads are driftless random walk or stationary AR(1).**
 
+We decided that the model might be a random walk because we can not reject the null hypothesis.  Again, we state this observation knowing that it might not actually be a random walk.   
 
 **This conclusion is different from the one you arrived at in Problem 1.  What
 is the reason for the difference?**
 
+The Dickey-Fuller test didn't not provide sufficient evidence to reject H0, that the model is a random walk with drift.  As a result, we can't reject over in favor of the other.  In Problem 1, our heuristic involved purely look at ACF and PACF plots and understanding the trends. 
 
 **Which conclusion is more justifiable, on statistical grounds?**
 
-
+With tau.t value of -3.155108, I would lean towards it having a p-value of .1 and determining that the UK interest rate spreads does have strong evidence of it potentially NOT being a random walk with drift.  Therefore, I conclude that it is an AR(1)
 
 **If you used a significance level of .05, what would you conclude from the
 Dickey-Fuller test?**
+
+At the .05 level, (-3.45 < tau.t < -3.15) the H0 is rejected, indicating that it is an AR(1) model.  
 
